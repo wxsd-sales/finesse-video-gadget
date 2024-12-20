@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+
+    <ModulePrefs title="Task Management Gadget"
+                 description="Task Management Gadget"
+                 thumbnail="http://localhost:8080/">
+
+        <Require feature="settitle" />
+        <Require feature="dynamic-height" />
+        <Require feature="pubsub-2" />
+        <Require feature="setprefs" />
+        <Require feature="loadingindicator">
+            <Param name="manual-dismiss">true</Param>
+        </Require>
+        <Locale lang="en" country="US" messages="test-Messages.xml" />
+        <Optional feature="content-rewrite">
+          <Param name="exclude-url">contextgadget.ciscoccservice.com</Param>
+        </Optional>
+    </ModulePrefs>
+
+    <UserPref name="externalServerHost" /> 
+    <Content type="html">
+        <![CDATA[
+        <!DOCTYPE html>
+        <head>
+
+          <script type="text/javascript">
+            const fetchAssets = (urls, cssAppend, scriptAppend, scb) => {
+                let promiseArr = [];
+                urls.forEach(url => {
+                    if (url.endsWith('.css') || url.endsWith('.CSS') || url.endsWith('.cssgz') || url.endsWith('.CSSGZ')) {
+                        let se = document.createElement('link');
+                        se.rel = 'stylesheet';
+                        se.type = 'text/css';
+                        se.href = url;
+                        promiseArr.push(new Promise((resolve, reject) => { se.onload = resolve; }));
+                        if (cssAppend) {
+                            document.head.appendChild(se);
+                        } else {
+                            document.head.prepend(se);
+                        }
+                    } else {
+                        let se = document.createElement('script');
+                        se.type = 'text/javascript';
+                        se.src = url;
+                        se.async = false;
+                        promiseArr.push(new Promise((resolve, reject) => { se.onload = resolve; }));
+                        if (scriptAppend) {
+                            document.head.appendChild(se);
+                        } else {
+                            document.head.prepend(se);
+                        }
+                    }
+                });
+
+                Promise.all(promiseArr).then(() => {
+                    if (typeof scb === 'function') {
+                        scb();
+                    }
+                });
+            };
+
+            fetchAssets([
+                    '/desktop/thirdparty/bootstrap/5.3.1/css/bootstrap.css'
+                ], false, false);
+          </script>
+
+          <link rel="stylesheet" href="TaskManagementGadget.css" type="text/css" />
+
+          <!-- Context Control Gadget Library -->
+          <script src="https://contextgadget.ciscoccservice.com/control/ContextServiceGadgetControl.js"></script>
+
+          <!-- jQuery -->
+          <script type="text/javascript" src="/desktop/assets/js/jquery.min.js"></script>
+
+          <!-- Bootstrap -->
+          <script type="text/javascript" src="/desktop/thirdparty/bootstrap/5.3.1/js/bootstrap.bundle.min.js"></script>
+          
+          <!-- Finesse Library -->
+          <script type="text/javascript" src="/desktop/assets/js/finesse.js"></script>
+
+          <!-- Helper to display messages -->
+          <script type="text/javascript" src="/desktop/js/utilities/MessageDisplay.js"></script>
+          
+          <!-- Gadget Business Logic -->
+          <script type="text/javascript" src="TaskManagementGadget.js"></script>
+          <script type="text/javascript" src="tabpanel.js"></script>
+        </head>
+        <body style="display:block;height:1000px">
+
+          <div id="media-header" class="row-header rounded-corners" tabindex="0">
+            <span id="mediaName" class="align-left"></span>
+            <div id="state-area" class="dropdown align-left" style="display:none">
+                <button id="state-btn" type="button" data-bs-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                    <span id="state-icon-status" class="state-icon state-icon-yellow"></span>
+                    <span id="stateDropDownText"> __MSG_gadget.taskManagementGadget.message.notReadyButton__</span>
+                    <span id="state-status" class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="state-btn">
+                  <li><a class="dropdown-item" id="goReady" onClick="finesse.modules.TaskManagementGadget.setUserStateOnMedia('READY');" href="#">__MSG_gadget.taskManagementGadget.message.readyButton__</a></li>
+                  <li><a class="dropdown-item" id="goNotReady" onClick="finesse.modules.TaskManagementGadget.setUserStateOnMedia('NOT_READY');" href="#">__MSG_gadget.taskManagementGadget.message.notReadyButton__</a></li>
+                </ul>
+            </div>
+            <div id="signin-area" class="align-right">
+                <div id="sign-in" class="sign-in-out-button" style="display:none">
+                    <button class="btn btn-info text-white" onClick="finesse.modules.TaskManagementGadget.loginToMrd();">__MSG_gadget.taskManagementGadget.message.signin__</button>
+                </div>
+                <div id="sign-out" class="sign-in-out-button" style="display:none">
+                    <button class="btn btn-info text-white" onclick="finesse.modules.TaskManagementGadget.logoutFromMrd()">__MSG_gadget.taskManagementGadget.message.signout__</button>
+                </div>
+            </div>
+            <div style="clear:both;"></div>
+
+          </div>
+          <div id="banner">
+              <div id="banner-msg"></div>
+          </div>
+
+          <!-- task management gadget -->
+          <div id="mediaSummary" style="display:none">
+
+              <div><b> __MSG_gadget.taskManagementGadget.message.mrdID__: </b><span id="mrdId"></div>
+
+              <div>
+                <input id="routable-checkbox" name="routable-checkbox" type="checkbox" onClick="finesse.modules.TaskManagementGadget.setRoutability();">
+                <label id="routable-checkbox-label" for="routable-checkbox" class="normal required">__MSG_gadget.taskManagementGadget.message.routable__</label>
+                <img id="routable-tooltip" class="help-icon-tooltip" src="images/help.png" title="__MSG_gadget.taskManagementGadget.message.routableTooltip__" data-bs-toggle="tooltip" data-bs-placement="right"/>
+              </div>
+
+          </div>
+    
+          <div class="row">
+          </div>
+            <div class="tabbable" style="height:100%">
+              <ul class="nav nav-tabs" id="myTab" role="tablist">
+              </ul>
+              <div class="tab-content" style="overflow:scroll;height:100%;display:flex;flex-direction:column;">
+				
+				<div class="registar-iframes" style="order:2;height:60%">
+					<iframe id="video-iframe"
+						width="60%" 
+						height="100%" 
+						scrolling = "no"
+						style="border:1px solid #000;"
+						allow="camera;microphone">
+					</iframe>
+					<iframe id="registar-work"
+						width="38%" 
+						height="100%" 
+						scrolling = "no"
+						style="border:1px solid #000;">
+					</iframe>
+				</div>
+            
+			</div>
+            <script id="dialog-tabpane-template" type="text/x-custom-template">
+                <div class="tab-pane" id="newTab" style="order:1" role="tabpanel">
+                    <div id="allowableActions" class="container-fluid allowable-actions">
+                        <button id="endButton" class="align-right btn btn-danger" value='CLOSE'>End</button>
+                        <button id="startButton" class="align-right btn btn-success" value='START'>Start</button>
+                        <button id="acceptButton" class="align-right btn btn-success" value='ACCEPT'>Accept</button>
+                        <button id="pauseButton" class="align-left btn btn-inverse" value='PAUSE'>Pause</button>
+                        <button id="resumeButton" class="align-left btn btn-inverse" value='RESUME'>Resume</button>
+                        <button id="wrapupButton" class="align-left btn btn-inverse" value='WRAP_UP'>Wrap Up</button>
+                    </div>
+                    <div>__MSG_gadget.taskManagementGadget.message.dialogId__ : <span id="dialogId"/></div>
+                    <div>__MSG_gadget.taskManagementGadget.message.dialogState__ : <span class="dialog-state"/></div>
+                    <br>
+                    <table class="table"><tbody class="cv-table-body"/></table>
+                </div>
+
+            </script>
+
+            <script id="transfer-button-template" type="text/x-custom-template">
+                <div class="align-left dropdown">
+                    <button id="transferButton" data-bs-toggle="dropdown" class="btn btn-inverse dropdown-toggle" value='TRANSFER'>Transfer</button>
+                    <ul id="transferDropdown" class="dropdown-menu" aria-labelledby="transferButton">
+                    </ul>
+                </div>
+            </script>
+
+        </body>
+
+        <script type="text/javascript">
+          gadgets.HubSettings.onConnect = function () {
+            finesse.modules.TaskManagementGadget.init();
+          };
+
+        </script>
+      ]]>
+    </Content>
+</Module>
