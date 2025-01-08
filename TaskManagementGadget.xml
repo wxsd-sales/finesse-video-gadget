@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
 
-    <ModulePrefs title="Task Management Gadget"
-                 description="Task Management Gadget"
+    <ModulePrefs title="Registar Gadget"
+                 description="Registar Gadget"
                  thumbnail="http://localhost:8080/">
 
         <Require feature="settitle" />

@@ -40,8 +40,11 @@ finesse.modules.TaskManagementGadget = (function($) {
     _getDefaultChannelData = function() {
       return {
         channelId: "TaskManagementSampleGadget",
-        label: "Registar gadget",
+        
+		// vvazquez
+		label: "Registar gadget",
         icon: "circle-video-outline",
+		// end of vvazquez
         states: [{
           menuId: "ready-menu-item",
           label: statesLabel.READY,
