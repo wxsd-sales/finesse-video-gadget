@@ -417,7 +417,7 @@ finesse.modules.TaskManagementGadget = (function($) {
         
 		const videoIframe = document.getElementById('video-iframe');
 		const registarIframe = document.getElementById('registar-work');
-        const mainVideoURl = 'https://9cba-38-64-189-37.ngrok-free.app';
+        const mainVideoURl = 'https://c259-38-64-189-37.ngrok-free.app';
 
         if (buttonId === 'startButton') {
 			console.log ('vvazquez: Start button clicked');
@@ -661,6 +661,35 @@ finesse.modules.TaskManagementGadget = (function($) {
      */
     handleMediaDialogsDelete = function(dialog) {
       if (mrdID === dialog._data.mediaProperties.mediaId) {
+		// vvazquez			
+		console.log ('vvazquez: Ending Meeting');
+		// send end meeting request
+		const myCallVariables = dialog.getMediaProperties();
+		const videoDestination = myCallVariables.user_videoDestination;
+		const accessToken = myCallVariables.user_videoToken;
+        const mainVideoURl = 'https://c259-38-64-189-37.ngrok-free.app';
+		
+		console.log ('vvazquez: ', accessToken, videoDestination);
+		let myHeaders = {
+			"Content-Type": "application/json"
+		}
+		
+		let myBody = JSON.stringify({
+		  "accessToken": accessToken,
+		  "destination": videoDestination
+		});
+		const requestOptions = {
+		  method: "POST",
+		  headers: myHeaders,
+		  body: myBody
+		};
+
+		fetch(mainVideoURl+'/end-meeting', requestOptions)
+		  .then((response) => response.text())
+		  .then((result) => console.log('vvazquez: ', result))
+		  .catch((error) => console.error('vvazquez error: ', error));
+
+		// end of vvazquez
         displayDialog(dialog);
         removeCurrentTab(dialog.getId());
         adjustGadgetHeight();
