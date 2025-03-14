@@ -417,19 +417,41 @@ finesse.modules.TaskManagementGadget = (function($) {
         
 		const videoIframe = document.getElementById('video-iframe');
 		const registarIframe = document.getElementById('registar-work');
-        const mainVideoURl = 'https://c259-38-64-189-37.ngrok-free.app';
+        const mainVideoURl = 'https://2653-38-64-189-37.ngrok-free.app';
+		const myCallVariables = dialog.getMediaProperties();
+		console.log ('vvazquez: call variables',myCallVariables);
+		const videoDestination = myCallVariables.user_videoDestination;
+		const accessToken = myCallVariables.user_videoToken;
 
         if (buttonId === 'startButton') {
 			console.log ('vvazquez: Start button clicked');
-			const myCallVariables = dialog.getMediaProperties();
-			console.log ('vvazquez: call variables',myCallVariables);
-			const videoDestination = myCallVariables.user_videoDestination;
-			const token = myCallVariables.user_videoToken;
-			const fullVideoURl = mainVideoURl + '?access_token=' + token + '&destination=' + videoDestination +'&site=agent';
+
+			const fullVideoURl = mainVideoURl + '?access_token=' + accessToken + '&destination=' + videoDestination +'&site=agent';
 			console.log('vvazquez: fullVideoURl',fullVideoURl);
 			videoIframe.src = fullVideoURl;
 			registarIframe.src = 'https://socketeer.glitch.me/';
         }
+		// trying again to end the call for everyone here
+		if (buttonId === 'endButton')	{
+			let myHeaders = {
+			"Content-Type": "application/json"
+			}
+		
+			let myBody = JSON.stringify({
+			  "accessToken": accessToken,
+			  "destination": videoDestination
+			});
+			const requestOptions = {
+			  method: "POST",
+			  headers: myHeaders,
+			  body: myBody
+			};
+			console.log ('vvazquez body: ', myBody);
+			fetch(mainVideoURl+'/end-meeting', requestOptions)
+			  .then((response) => response.text())
+			  .then((result) => console.log('vvazquez: ', result))
+			  .catch((error) => console.error('vvazquez error: ', error));
+		}
         // end of vvazquez
         dialog.setTaskState(e.target.value, handlers);
       };
@@ -664,6 +686,8 @@ finesse.modules.TaskManagementGadget = (function($) {
 		// vvazquez			
 		console.log ('vvazquez: Ending Meeting');
 		// send end meeting request
+		// doing it here works, but it also end the meeting if dialog is not accepted by the agent
+		/*
 		const myCallVariables = dialog.getMediaProperties();
 		const videoDestination = myCallVariables.user_videoDestination;
 		const accessToken = myCallVariables.user_videoToken;
@@ -690,6 +714,7 @@ finesse.modules.TaskManagementGadget = (function($) {
 		  .catch((error) => console.error('vvazquez error: ', error));
 
 		// end of vvazquez
+		*/
         displayDialog(dialog);
         removeCurrentTab(dialog.getId());
         adjustGadgetHeight();
