@@ -430,7 +430,33 @@ finesse.modules.TaskManagementGadget = (function($) {
 			console.log('vvazquez: fullVideoURl',fullVideoURl);
 			videoIframe.src = fullVideoURl;
 			registarIframe.src = 'https://socketeer.glitch.me/';
+			
+			// sending the Registar name
+			const fullName = user.getFullName();
+			const agentJoinURl = 'https://cc6f-38-64-189-37.ngrok-free.app/agent-join';
+			const guid = '12345';
+			let myHeaders = {
+				"Content-Type": "application/json"
+			}
+			let myBody = JSON.stringify({
+			  "accessToken": accessToken,
+			  "destination": videoDestination,
+			  "fullName": fullName,
+			  "guid": 
+			});
+			console.log ('vvazquez: body for agent join:', myBody);
+			const requestOptions = {
+			  method: "POST",
+			  headers: myHeaders,
+			  body: myBody
+			};
+			console.log ('vvazquez body: ', myBody);
+			fetch(agentJoinURl+'/end-meeting', requestOptions)
+			  .then((response) => response.text())
+			  .then((result) => console.log('vvazquez: ', result))
+			  .catch((error) => console.error('vvazquez error: ', error));
         }
+		
 		// trying again to end the call for everyone here
 		if (buttonId === 'endButton')	{
 			let myHeaders = {
