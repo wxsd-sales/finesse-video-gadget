@@ -442,7 +442,7 @@ finesse.modules.TaskManagementGadget = (function($) {
 			  "accessToken": accessToken,
 			  "destination": videoDestination,
 			  "fullName": fullName,
-			  "guid": 
+			  "guid": guid
 			});
 			console.log ('vvazquez: body for agent join:', myBody);
 			const requestOptions = {
